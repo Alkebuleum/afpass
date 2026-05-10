@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AfPass — A Sovereign Identity Passport for Africa's Digital Economy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #0E0E0C;
+    --ink-2:      #18181500;
+    --paper:      #F2EBDA;
+    --paper-2:    #E8DFC9;
+    --paper-dim:  #B8AE94;
+    --bronze:     #C5984A;
+    --bronze-2:   #8B6914;
+    --bronze-dim: #6B5210;
+    --red:        #A82820;
+    --green:      #2E5D3E;
+    --line:       rgba(242, 235, 218, 0.14);
+    --line-strong:rgba(242, 235, 218, 0.32);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 1.55;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ==================== Background texture ==================== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(197, 152, 74, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(168, 40, 32, 0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+    mix-blend-mode: overlay;
+  }
+
+  main, nav, footer { position: relative; z-index: 2; }
+
+  /* ==================== Nav ==================== */
+  nav.top {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    padding: 22px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(12px);
+    background: rgba(14, 14, 12, 0.55);
+    border-bottom: 1px solid var(--line);
+    transition: padding 0.4s ease;
+  }
+  nav.top.scrolled { padding: 14px 48px; }
+  .brand {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-mark {
+    width: 28px; height: 28px;
+    border: 1.5px solid var(--bronze);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--bronze);
+  }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+  }
+  .nav-links a {
+    color: var(--paper-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+    position: relative;
+  }
+  .nav-links a:hover { color: var(--paper); }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: -6px;
+    width: 0; height: 1px;
+    background: var(--bronze);
+    transition: width 0.3s ease;
+  }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink);
+    background: var(--paper);
+    padding: 10px 18px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .nav-cta:hover { background: var(--bronze); color: var(--ink); }
+
+  /* ==================== Hero ==================== */
+  .hero {
+    min-height: 100vh;
+    padding: 140px 48px 80px;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    position: relative;
+  }
+  .hero-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--bronze);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .hero-meta::before {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--bronze);
+  }
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(56px, 7vw, 108px);
+    line-height: 0.92;
+    letter-spacing: -0.025em;
+    margin-bottom: 36px;
+    font-variation-settings: "SOFT" 50;
+  }
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--bronze);
+    font-variation-settings: "SOFT" 100;
+  }
+  .hero-sub {
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--paper-dim);
+    max-width: 520px;
+    margin-bottom: 48px;
+    font-weight: 300;
+  }
+  .hero-sub strong {
+    color: var(--paper);
+    font-weight: 500;
+    font-style: italic;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  .btn-primary {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    padding: 16px 28px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.25s;
+    border: 1px solid var(--paper);
+  }
+  .btn-primary:hover {
+    background: var(--bronze);
+    border-color: var(--bronze);
+    transform: translateY(-2px);
+  }
+  .btn-ghost {
+    color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    padding: 16px 0;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--line-strong);
+    transition: border-color 0.25s;
+  }
+  .btn-ghost:hover { border-color: var(--bronze); color: var(--bronze); }
+  .arrow { transition: transform 0.25s; }
+  .btn-primary:hover .arrow, .btn-ghost:hover .arrow { transform: translateX(4px); }
+
+  /* ==================== Passport Card ==================== */
+  .passport-stage {
+    perspective: 2000px;
+    display: grid;
+    place-items: center;
+  }
+  .passport {
+    width: 100%;
+    max-width: 460px;
+    aspect-ratio: 1.586 / 1;
+    background:
+      linear-gradient(135deg, #1A1814 0%, #2C2418 50%, #1A1814 100%);
+    border: 1px solid rgba(197, 152, 74, 0.4);
+    border-radius: 8px;
+    padding: 32px;
+    position: relative;
+    box-shadow:
+      0 50px 80px -20px rgba(0, 0, 0, 0.7),
+      0 0 0 1px rgba(197, 152, 74, 0.15) inset,
+      0 20px 40px -10px rgba(197, 152, 74, 0.15);
+    transform-style: preserve-3d;
+    transform: rotateX(8deg) rotateY(-12deg);
+    animation: float 8s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: rotateX(8deg) rotateY(-12deg) translateY(0); }
+    50%      { transform: rotateX(6deg) rotateY(-10deg) translateY(-12px); }
+  }
+
+  /* Holographic shimmer */
+  .passport::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background: linear-gradient(
+      105deg,
+      transparent 35%,
+      rgba(197, 152, 74, 0.18) 45%,
+      rgba(242, 235, 218, 0.25) 50%,
+      rgba(197, 152, 74, 0.18) 55%,
+      transparent 65%
+    );
+    background-size: 200% 100%;
+    background-position: 200% 0;
+    animation: shimmer 6s ease-in-out infinite;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+  @keyframes shimmer {
+    0%, 100% { background-position: 200% 0; }
+    50%      { background-position: -50% 0; }
+  }
+
+  /* Guilloché pattern */
+  .passport::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3Cpattern id='g' x='0' y='0' width='30' height='30' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='15' cy='15' r='14' fill='none' stroke='%23C5984A' stroke-width='0.3' opacity='0.4'/%3E%3Ccircle cx='15' cy='15' r='9' fill='none' stroke='%23C5984A' stroke-width='0.3' opacity='0.3'/%3E%3Ccircle cx='15' cy='15' r='4' fill='none' stroke='%23C5984A' stroke-width='0.3' opacity='0.4'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='200' height='200' fill='url(%23g)'/%3E%3C/svg%3E");
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .pass-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+  .pass-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .pass-seal {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    color: var(--bronze);
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    line-height: 1.6;
+  }
+  .pass-chip {
+    width: 38px; height: 28px;
+    background: linear-gradient(135deg, #C5984A 0%, #8B6914 100%);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .pass-chip::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background-image:
+      linear-gradient(90deg, rgba(0,0,0,0.3) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(0,0,0,0.3) 1px, transparent 1px);
+    background-size: 6px 6px;
+    opacity: 0.6;
+  }
+  .pass-name {
+    font-family: 'Fraunces', serif;
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--paper);
+    letter-spacing: -0.02em;
+    line-height: 0.9;
+    font-variation-settings: "SOFT" 30;
+  }
+  .pass-name em {
+    color: var(--bronze);
+    font-style: italic;
+    font-weight: 300;
+  }
+  .pass-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--paper-dim);
+    margin-top: 6px;
+  }
+  .pass-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--paper-dim);
+  }
+  .pass-bottom div span {
+    display: block;
+    color: var(--paper);
+    font-size: 11px;
+    margin-top: 4px;
+    letter-spacing: 0.15em;
+  }
+  .mrz {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--paper-dim);
+    letter-spacing: 0.05em;
+    border-top: 1px dashed rgba(197, 152, 74, 0.3);
+    padding-top: 10px;
+    margin-top: 12px;
+    font-weight: 400;
+  }
+
+  /* ==================== Section base ==================== */
+  section { padding: 140px 48px; position: relative; }
+  .container { max-width: 1280px; margin: 0 auto; }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--bronze);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .section-label::before { content: '§'; font-family: 'Fraunces', serif; font-size: 18px; color: var(--bronze); }
+  .section-heading {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(40px, 5vw, 72px);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    max-width: 900px;
+    margin-bottom: 28px;
+    font-variation-settings: "SOFT" 60;
+  }
+  .section-heading em {
+    font-style: italic;
+    color: var(--bronze);
+    font-weight: 300;
+    font-variation-settings: "SOFT" 100;
+  }
+  .section-lead {
+    font-size: 22px;
+    line-height: 1.55;
+    color: var(--paper-dim);
+    max-width: 720px;
+    font-weight: 300;
+    margin-bottom: 80px;
+  }
+
+  /* ==================== The problem ==================== */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    margin-top: 60px;
+  }
+  .problem-card {
+    background: var(--ink);
+    padding: 56px 40px;
+    position: relative;
+    transition: background 0.4s;
+  }
+  .problem-card:hover { background: #15140F; }
+  .problem-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-style: italic;
+    font-size: 64px;
+    color: var(--bronze);
+    line-height: 0.8;
+    margin-bottom: 32px;
+    font-variation-settings: "SOFT" 100;
+  }
+  .problem-card h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1.15;
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+  .problem-card p {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--paper-dim);
+    font-weight: 300;
+  }
+
+  /* ==================== Three layers ==================== */
+  .layers-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 100px;
+    align-items: center;
+    margin-top: 60px;
+  }
+  .layers-stack {
+    position: relative;
+    height: 460px;
+  }
+  .layer-block {
+    position: absolute;
+    left: 0; right: 0;
+    height: 130px;
+    border: 1px solid var(--line-strong);
+    padding: 26px 32px;
+    background: var(--ink);
+    transition: all 0.4s cubic-bezier(0.2, 0, 0.2, 1);
+    cursor: pointer;
+  }
+  .layer-block::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 0;
+    width: 3px;
+    background: var(--bronze);
+    transform: scaleY(0);
+    transition: transform 0.4s;
+    transform-origin: top;
+  }
+  .layer-block:hover::before, .layer-block.active::before { transform: scaleY(1); }
+  .layer-block:hover, .layer-block.active { background: #15140F; transform: translateX(8px); }
+  .layer-block:nth-child(1) { top: 0; }
+  .layer-block:nth-child(2) { top: 160px; }
+  .layer-block:nth-child(3) { top: 320px; }
+  .layer-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--bronze);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .layer-name {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .layer-desc {
+    font-size: 16px;
+    color: var(--paper-dim);
+    font-weight: 300;
+    line-height: 1.45;
+  }
+  .layers-text h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 44px;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    margin-bottom: 28px;
+    font-variation-settings: "SOFT" 60;
+  }
+  .layers-text h3 em { font-style: italic; color: var(--bronze); font-weight: 300; }
+  .layers-text p { font-size: 19px; color: var(--paper-dim); line-height: 1.6; font-weight: 300; margin-bottom: 18px; }
+
+  /* ==================== Manifesto / pull-quote ==================== */
+  .manifesto {
+    padding: 180px 48px;
+    text-align: center;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  .manifesto::before {
+    content: '"';
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Fraunces', serif;
+    font-size: 420px;
+    color: var(--bronze);
+    opacity: 0.06;
+    line-height: 1;
+    pointer-events: none;
+    font-variation-settings: "SOFT" 100;
+  }
+  .manifesto-quote {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-style: italic;
+    font-size: clamp(32px, 4.5vw, 56px);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    font-variation-settings: "SOFT" 100;
+  }
+  .manifesto-quote strong {
+    font-weight: 500;
+    color: var(--bronze);
+    font-style: normal;
+  }
+  .manifesto-attr {
+    margin-top: 48px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--paper-dim);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ==================== Capabilities ==================== */
+  .caps-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    margin-top: 80px;
+    border-top: 1px solid var(--line);
+  }
+  .cap-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 1fr;
+    gap: 40px;
+    padding: 44px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: center;
+    transition: background 0.3s, padding 0.3s;
+  }
+  .cap-row:hover { padding-left: 16px; background: rgba(197, 152, 74, 0.03); }
+  .cap-grid-cell:nth-child(odd) { padding-right: 40px; border-right: 1px solid var(--line); }
+  .cap-grid-cell:nth-child(even) { padding-left: 40px; }
+  .cap-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--bronze);
+    letter-spacing: 0.2em;
+  }
+  .cap-title {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .cap-desc {
+    font-size: 16px;
+    color: var(--paper-dim);
+    line-height: 1.5;
+    font-weight: 300;
+  }
+
+  /* ==================== Use cases ==================== */
+  .cases-intro { margin-bottom: 100px; }
+  .cases {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 80px;
+  }
+  .case {
+    border-top: 2px solid var(--bronze);
+    padding-top: 28px;
+  }
+  .case-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--bronze);
+    margin-bottom: 18px;
+  }
+  .case h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    letter-spacing: -0.015em;
+    font-variation-settings: "SOFT" 50;
+  }
+  .case h3 em { font-style: italic; color: var(--bronze); font-weight: 300; }
+  .case p {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--paper-dim);
+    font-weight: 300;
+  }
+
+  /* ==================== Whitepaper CTA ==================== */
+  .paper-cta {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 140px 48px;
+    background:
+      radial-gradient(ellipse at 30% 50%, rgba(197, 152, 74, 0.06) 0%, transparent 50%);
+  }
+  .paper-cta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 100px;
+    align-items: center;
+  }
+  .paper-cta h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(40px, 5vw, 68px);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin-bottom: 32px;
+    font-variation-settings: "SOFT" 60;
+  }
+  .paper-cta h2 em { font-style: italic; color: var(--bronze); font-weight: 300; }
+  .paper-cta p {
+    font-size: 20px;
+    color: var(--paper-dim);
+    line-height: 1.55;
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+  .paper-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--paper-dim);
+    display: flex;
+    gap: 32px;
+    margin-bottom: 40px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+  }
+  .paper-meta div span { color: var(--paper); display: block; font-size: 14px; margin-top: 6px; letter-spacing: 0.1em; }
+
+  /* Paper visual */
+  .paper-visual {
+    position: relative;
+    aspect-ratio: 1 / 1.3;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 60px 50px;
+    box-shadow:
+      0 80px 100px -30px rgba(0, 0, 0, 0.8),
+      0 30px 50px -10px rgba(197, 152, 74, 0.2);
+    transform: rotate(-2deg);
+    transition: transform 0.6s cubic-bezier(0.2, 0, 0.2, 1);
+  }
+  .paper-visual:hover { transform: rotate(0deg) translateY(-8px); }
+  .paper-visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.45 0 0 0 0 0.3 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+  .paper-meta-top {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--bronze-2);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 80px;
+  }
+  .paper-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 52px;
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    margin-bottom: 18px;
+    color: var(--ink);
+    font-variation-settings: "SOFT" 30;
+  }
+  .paper-title em { font-style: italic; color: var(--bronze-2); }
+  .paper-subt {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--bronze-2);
+    line-height: 1.3;
+    margin-bottom: 60px;
+  }
+  .paper-rule {
+    width: 80px;
+    height: 1px;
+    background: var(--bronze-2);
+    margin-bottom: 24px;
+  }
+  .paper-bottom {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--bronze-2);
+    line-height: 1.8;
+  }
+  .paper-seal {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    width: 70px;
+    height: 70px;
+    border: 1.5px solid var(--bronze-2);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 28px;
+    color: var(--bronze-2);
+    transform: rotate(-10deg);
+  }
+
+  /* ==================== Footer ==================== */
+  footer {
+    padding: 80px 48px 48px;
+    border-top: 1px solid var(--line);
+  }
+  .foot-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 60px;
+    margin-bottom: 80px;
+  }
+  .foot-brand {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 400;
+    margin-bottom: 16px;
+    font-variation-settings: "SOFT" 60;
+  }
+  .foot-brand em { font-style: italic; color: var(--bronze); font-weight: 300; }
+  .foot-tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--paper-dim);
+    max-width: 340px;
+  }
+  .foot-col h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--bronze);
+    margin-bottom: 20px;
+  }
+  .foot-col a {
+    display: block;
+    color: var(--paper-dim);
+    text-decoration: none;
+    font-size: 16px;
+    margin-bottom: 12px;
+    transition: color 0.2s;
+  }
+  .foot-col a:hover { color: var(--paper); }
+  .foot-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 40px;
+    border-top: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--paper-dim);
+  }
+
+  /* ==================== Reveal animations ==================== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 1s cubic-bezier(0.2, 0, 0.2, 1), transform 1s cubic-bezier(0.2, 0, 0.2, 1);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal-stagger.in > * { opacity: 1; transform: translateY(0); }
+  .reveal-stagger.in > *:nth-child(1) { transition-delay: 0s; }
+  .reveal-stagger.in > *:nth-child(2) { transition-delay: 0.12s; }
+  .reveal-stagger.in > *:nth-child(3) { transition-delay: 0.24s; }
+  .reveal-stagger.in > *:nth-child(4) { transition-delay: 0.36s; }
+  .reveal-stagger.in > *:nth-child(5) { transition-delay: 0.48s; }
+  .reveal-stagger.in > *:nth-child(6) { transition-delay: 0.60s; }
+
+  /* ==================== Responsive ==================== */
+  @media (max-width: 1024px) {
+    .hero { grid-template-columns: 1fr; gap: 60px; padding-top: 120px; }
+    .layers-wrap, .paper-cta-grid { grid-template-columns: 1fr; gap: 60px; }
+    .problem-grid { grid-template-columns: 1fr; }
+    .cases { grid-template-columns: 1fr; gap: 60px; }
+    .caps-grid { grid-template-columns: 1fr; }
+    .cap-grid-cell { padding: 0 !important; border: none !important; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+    nav.top { padding: 16px 24px; }
+    section, .hero, .manifesto, .paper-cta, footer { padding-left: 24px; padding-right: 24px; }
+  }
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 56px; }
+    .hero-sub { font-size: 19px; }
+    .pass-name { font-size: 42px; }
+    .hero-actions { flex-direction: column; align-items: stretch; }
+    .btn-primary, .btn-ghost { justify-content: center; }
+    section { padding: 90px 24px; }
+    .manifesto { padding: 100px 24px; }
+    .foot-grid { grid-template-columns: 1fr; gap: 40px; }
+    .foot-bottom { flex-direction: column; gap: 16px; text-align: center; }
+    .cap-row { grid-template-columns: 1fr; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="top" id="topnav">
+  <div class="brand">
+    <span class="brand-mark">A</span>
+    AfPass
+  </div>
+  <div class="nav-links">
+    <a href="#problem">The Problem</a>
+    <a href="#stack">The Stack</a>
+    <a href="#capabilities">Capabilities</a>
+    <a href="#whitepaper">Whitepaper</a>
+  </div>
+  <a href="#whitepaper" class="nav-cta">Read the Paper</a>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left reveal">
+      <div class="hero-meta">A Sovereign Identity Stack for Africa</div>
+      <h1>One passport.<br>A continent of <em>trust.</em></h1>
+      <p class="hero-sub">
+        <strong>AfPass</strong> is the African Identity Passport — a sovereign digital identity built for the people, businesses, and institutions powering Africa's digital economy. Prove who you are across borders without surrendering your private data.
+      </p>
+      <div class="hero-actions">
+        <a href="#whitepaper" class="btn-primary">
+          Read the Whitepaper
+          <span class="arrow">→</span>
+        </a>
+        <a href="#stack" class="btn-ghost">
+          See how it works
+          <span class="arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="passport-stage reveal">
+      <div class="passport">
+        <div class="pass-content">
+          <div class="pass-top">
+            <div class="pass-seal">
+              African Identity<br>Protocol · v1.0<br>Issued on Alkebuleum
+            </div>
+            <div class="pass-chip"></div>
+          </div>
+          <div>
+            <div class="pass-name">Af<em>Pass</em></div>
+            <div class="pass-tagline">The African Identity Passport</div>
+          </div>
+          <div>
+            <div class="pass-bottom">
+              <div>Holder<span>VERIFIED</span></div>
+              <div>Jurisdiction<span>AFRICA</span></div>
+              <div>Validity<span>SOVEREIGN</span></div>
+            </div>
+            <div class="mrz">P&lt;AFRAFPASS&lt;&lt;SOVEREIGN&lt;IDENTITY&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE PROBLEM -->
+  <section id="problem">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">The Problem</div>
+        <h2 class="section-heading">Africa's digital economy is being built on <em>fragmented trust.</em></h2>
+        <p class="section-lead">A single African market cannot be built on isolated identity silos. Today, every platform, every bank, every border asks for the same documents — and stores them somewhere you don't control.</p>
+      </div>
+
+      <div class="problem-grid reveal-stagger">
+        <div class="problem-card">
+          <div class="problem-num">01</div>
+          <h3>Identity is fragmented across borders.</h3>
+          <p>National IDs serve domestic administration, but Africa's economic future is regional and continental. A merchant in Liberia cannot easily verify a buyer in Ghana. A diaspora investor cannot verify a Lagos business without uploading documents to a foreign platform.</p>
+        </div>
+        <div class="problem-card">
+          <div class="problem-num">02</div>
+          <h3>Private data sits in foreign databases.</h3>
+          <p>Verification has been outsourced to centralized commercial platforms — accumulating passports, biometrics, addresses, and behavior in jurisdictions Africa does not govern. The continent's most sensitive infrastructure has quietly become a foreign data product.</p>
+        </div>
+        <div class="problem-card">
+          <div class="problem-num">03</div>
+          <h3>2.8 billion lack a usable digital identity.</h3>
+          <p>The World Bank estimates 2.8 billion people globally lack access to a government-recognized digital identity for secure online transactions — a disproportionate share of them African. This is not a social problem alone. It is an economic infrastructure problem.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE STACK -->
+  <section id="stack">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">The Solution</div>
+        <h2 class="section-heading">A three-layer stack, built <em>sovereign</em> from the ground.</h2>
+      </div>
+
+      <div class="layers-wrap">
+        <div class="layers-stack reveal">
+          <div class="layer-block active" data-l="1">
+            <div class="layer-num">Layer 01 · Infrastructure</div>
+            <div class="layer-name">Alkebuleum</div>
+            <div class="layer-desc">Sovereign African blockchain. Validators, governance, and registries that cannot be captured.</div>
+          </div>
+          <div class="layer-block" data-l="2">
+            <div class="layer-num">Layer 02 · Protocol</div>
+            <div class="layer-name">African Identity Protocol</div>
+            <div class="layer-desc">Rules, schemas, issuer accreditation, revocation, and lawful access. The trust framework.</div>
+          </div>
+          <div class="layer-block" data-l="3">
+            <div class="layer-num">Layer 03 · Product</div>
+            <div class="layer-name">AfPass</div>
+            <div class="layer-desc">The user-facing identity passport. Hold credentials. Prove who you are. Reveal only what's needed.</div>
+          </div>
+        </div>
+
+        <div class="layers-text reveal">
+          <h3>Sovereignty isn't a feature. It's <em>the foundation.</em></h3>
+          <p>If Africa's identity layer runs on a foreign blockchain, with foreign validators and foreign governance, then identity sovereignty has not been solved — it has only been moved one layer down.</p>
+          <p>Alkebuleum is the settlement layer because identity is too foundational to outsource. The protocol can interoperate with the world. The trust layer must be governed at home.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MANIFESTO -->
+  <section class="manifesto">
+    <div class="reveal">
+      <p class="manifesto-quote">
+        Interoperability can be global,<br>
+        but <strong>sovereignty must be local.</strong>
+      </p>
+      <div class="manifesto-attr">— The AfPass Principle</div>
+    </div>
+  </section>
+
+  <!-- CAPABILITIES -->
+  <section id="capabilities">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">What AfPass Enables</div>
+        <h2 class="section-heading">Prove anything. <em>Reveal almost nothing.</em></h2>
+        <p class="section-lead">AfPass holds verified credentials issued by trusted institutions. You decide what to share, when, and with whom. The blockchain stores proofs and revocation status — never your private data.</p>
+      </div>
+
+      <div class="caps-grid reveal">
+        <div class="cap-grid-cell">
+          <div class="cap-row">
+            <div class="cap-num">01 →</div>
+            <div class="cap-title">Reusable KYC</div>
+            <div class="cap-desc">Complete KYC once. Present a signed proof to any platform — no more re-uploading your passport.</div>
+          </div>
+        </div>
+        <div class="cap-grid-cell">
+          <div class="cap-row">
+            <div class="cap-num">02 →</div>
+            <div class="cap-title">Cross-border business verification</div>
+            <div class="cap-desc">Prove registration, ownership, licensing, and tax status across African markets.</div>
+          </div>
+        </div>
+        <div class="cap-grid-cell">
+          <div class="cap-row">
+            <div class="cap-num">03 →</div>
+            <div class="cap-title">Selective disclosure</div>
+            <div class="cap-desc">Prove you're over 18, or resident, or licensed — without revealing the underlying document.</div>
+          </div>
+        </div>
+        <div class="cap-grid-cell">
+          <div class="cap-row">
+            <div class="cap-num">04 →</div>
+            <div class="cap-title">Diaspora trust</div>
+            <div class="cap-desc">Verify recipients, schools, businesses, and projects from anywhere in the world.</div>
+          </div>
+        </div>
+        <div class="cap-grid-cell">
+          <div class="cap-row">
+            <div class="cap-num">05 →</div>
+            <div class="cap-title">Verifiable credentials</div>
+            <div class="cap-desc">Degrees, licenses, employment, and certifications — cryptographically signed and revocable.</div>
+          </div>
+        </div>
+        <div class="cap-grid-cell">
+          <div class="cap-row">
+            <div class="cap-num">06 →</div>
+            <div class="cap-title">Lawful regulator access</div>
+            <div class="cap-desc">Auditable, scope-limited disclosure paths for regulators. No universal backdoors. Ever.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USE CASES -->
+  <section>
+    <div class="container">
+      <div class="reveal cases-intro">
+        <div class="section-label">In Practice</div>
+        <h2 class="section-heading">Built for the economy <em>Africa is becoming.</em></h2>
+      </div>
+
+      <div class="cases">
+        <div class="case reveal">
+          <div class="case-tag">AfCFTA</div>
+          <h3>Trade <em>without friction.</em></h3>
+          <p>The AfCFTA Protocol on Digital Trade calls for interoperable digital identity across State Parties. AfPass turns that mandate into infrastructure — verified persons and businesses, recognized across the continent's single market.</p>
+        </div>
+        <div class="case reveal">
+          <div class="case-tag">Financial Inclusion</div>
+          <h3>Credit, <em>finally addressable.</em></h3>
+          <p>Build a verified reputation without exposing every financial detail. Verified phone, verified business activity, verified repayment claims — the inputs for alternative credit that doesn't punish the informal economy.</p>
+        </div>
+        <div class="case reveal">
+          <div class="case-tag">Diaspora</div>
+          <h3>Send. Invest. <em>Verify first.</em></h3>
+          <p>$95B+ in annual remittances. Diaspora investment that wants to grow but cannot verify the counterparty. AfPass closes that gap with cryptographic proof of identity, ownership, and registration.</p>
+        </div>
+        <div class="case reveal">
+          <div class="case-tag">Public Services</div>
+          <h3>Eligibility <em>without surveillance.</em></h3>
+          <p>Governments and NGOs can deliver subsidies, scholarships, and benefits by verifying eligibility through proofs — not by collecting and storing every underlying record.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHITEPAPER -->
+  <section id="whitepaper" class="paper-cta">
+    <div class="container">
+      <div class="paper-cta-grid">
+        <div class="reveal">
+          <div class="section-label">The Whitepaper</div>
+          <h2>The full architecture. <em>The complete case.</em></h2>
+          <p>A funder-ready, policy-aligned proposal for sovereign African identity infrastructure — covering architecture, privacy model, governance, lawful access, regional policy alignment, pilot design, and the roadmap to continental adoption.</p>
+
+          <div class="paper-meta">
+            <div>Version<span>1.0</span></div>
+            <div>Pages<span>~50</span></div>
+            <div>Format<span>DOCX · PDF</span></div>
+          </div>
+
+          <a href="/AfPass_Whitepaper.docx" class="btn-primary">
+            Download the Whitepaper
+            <span class="arrow">↓</span>
+          </a>
+        </div>
+
+        <div class="reveal">
+          <div class="paper-visual">
+            <div class="paper-meta-top">
+              <span>African Identity Protocol</span>
+              <span>v1.0</span>
+            </div>
+            <div class="paper-title">Af<em>Pass</em></div>
+            <div class="paper-subt">A Sovereign Identity Passport for Africa's Digital Economy</div>
+            <div class="paper-rule"></div>
+            <div class="paper-bottom">
+              Whitepaper<br>
+              Built on Alkebuleum<br>
+              May 2026
+            </div>
+            <div class="paper-seal">§</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">Af<em>Pass</em></div>
+        <div class="foot-tag">A sovereign identity passport for Africa's digital economy. Built on Alkebuleum.</div>
+      </div>
+      <div class="foot-col">
+        <h4>The Stack</h4>
+        <a href="#stack">Alkebuleum</a>
+        <a href="#stack">Identity Protocol</a>
+        <a href="#capabilities">AfPass</a>
+      </div>
+      <div class="foot-col">
+        <h4>Resources</h4>
+        <a href="/AfPass_Whitepaper.docx">Whitepaper</a>
+        <a href="#problem">The Problem</a>
+        <a href="#capabilities">Use Cases</a>
+      </div>
+      <div class="foot-col">
+        <h4>Connect</h4>
+        <a href="#">Contact</a>
+        <a href="#">Partners</a>
+        <a href="#">Press</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 AfPass · African Identity Protocol</span>
+      <span>Built sovereign · Built in Africa</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Scrolled nav state
+  const nav = document.getElementById('topnav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+  document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => io.observe(el));
+
+  // Trigger hero reveals immediately
+  setTimeout(() => {
+    document.querySelectorAll('.hero .reveal').forEach(el => el.classList.add('in'));
+  }, 100);
+
+  // Layer block interaction
+  document.querySelectorAll('.layer-block').forEach(block => {
+    block.addEventListener('mouseenter', () => {
+      document.querySelectorAll('.layer-block').forEach(b => b.classList.remove('active'));
+      block.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
